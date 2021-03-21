@@ -985,6 +985,7 @@ usage() {
 	printf -- "$(gettext "  --noprepare      Do not run the %s function in the %s")\n" "prepare()" "$BUILDSCRIPT"
 	printf -- "$(gettext "  --nosign         Do not create a signature for the package")\n"
 	printf -- "$(gettext "  --packagelist    Only list package filepaths that would be produced")\n"
+	printf -- "$(gettext "  --pconfig <file> Use an alternate pacman config file (instead of '%s')")\n" "/etc/pacman.conf"
 	printf -- "$(gettext "  --printsrcinfo   Print the generated SRCINFO and exit")\n"
 	printf -- "$(gettext "  --sign           Sign the resulting package with %s")\n" "gpg"
 	printf -- "$(gettext "  --skipchecksums  Do not verify checksums of the source files")\n"
@@ -1032,7 +1033,7 @@ OPT_SHORT="AcCdefFghiLmop:rRsSV"
 OPT_LONG=('allsource' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
           'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'noarchive' 'nobuild'
           'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'packagelist'
-          'printsrcinfo' 'repackage' 'rmdeps' 'sign' 'skipchecksums' 'skipinteg'
+          'pconfig:' 'printsrcinfo' 'repackage' 'rmdeps' 'sign' 'skipchecksums' 'skipinteg'
           'skippgpcheck' 'source' 'syncdeps' 'verifysource' 'version')
 
 # Pacman Options
@@ -1077,6 +1078,7 @@ while true; do
 		-o|--nobuild)     BUILDPKG=0 NOBUILD=1 ;;
 		-p)               shift; BUILDFILE=$1 ;;
 		--packagelist)    BUILDPKG=0 PACKAGELIST=1 IGNOREARCH=1;;
+		--pconfig)        shift; PACMAN_CONF=$1 ;;
 		--printsrcinfo)   BUILDPKG=0 PRINTSRCINFO=1 IGNOREARCH=1;;
 		-r|--rmdeps)      RMDEPS=1 ;;
 		-R|--repackage)   REPKG=1 ;;
@@ -1132,6 +1134,11 @@ PACKAGER=${PACKAGER:-"Unknown Packager"}
 PACMAN=${PACMAN:-pacman}
 # save full path to command as PATH may change when sourcing /etc/profile
 PACMAN_PATH=$(type -P $PACMAN)
+# set pacman config if not already defined (Use /etc/pacman.conf)
+PACMAN_CONF="${PACMAN_CONF:-/etc/pacman.conf}"
+
+# set pacman args for pacman.conf
+PACMAN_OPTS+=("--config" "${PACMAN_CONF}")
 
 # check if messages are to be printed using color
 if [[ -t 2 && $USE_COLOR != "n" ]] && check_buildenv "color" "y"; then
